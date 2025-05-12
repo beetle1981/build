@@ -2304,8 +2304,8 @@ index 00000000000..683abb54c36
 +		pinctrl-0 = <&codec_ctl>;
 +		status = "okay";
 +		ak7755,pdn-gpio = <&gpio1 RK_PA1 GPIO_ACTIVE_HIGH>; /*0*/
-+		tpa-sdz-gpio = <&gpio2 RK_PC6 GPIO_ACTIVE_LOW>; /*1*/
-+		tpa-mute-gpio = <&gpio2 RK_PD3 GPIO_ACTIVE_LOW>; /*1*/
++		ak7755,pwr-gpio = <&gpio2 RK_PC6 GPIO_ACTIVE_LOW>; /*1*/
++		ak7755,amp-gpio = <&gpio2 RK_PD3 GPIO_ACTIVE_LOW>; /*1*/
 +	};
 +	/*adc*/
 +	cx20810@35 {
