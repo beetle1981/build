@@ -2779,14 +2779,8 @@ index 000000000..657b1b274
 +
 +	//.idle_bias_off = false,
 +	.set_bias_level = ak7755_set_bias_level,
-+
-+	.reg_cache_size = ARRAY_SIZE(ak7755_reg),
-+	.reg_word_size = sizeof(u8),
-+	.reg_cache_default = ak7755_reg,
-+//	.readable_register = ak7755_readable,
-+//	.volatile_register = ak7755_volatile,
 +};
-+EXPORT_SYMBOL_GPL(soc_ccomponent_dev_ak7755);
++EXPORT_SYMBOL_GPL(soc_component_dev_ak7755);
 +
 +#ifdef CONFIG_OF
 +static struct of_device_id ak7755_if_dt_ids[] = {
@@ -2798,9 +2792,18 @@ index 000000000..657b1b274
 +
 +#ifdef AK7755_I2C_IF
 +static struct regmap_config ak7755_i2c_regmap = {
-+	.reg_bits		= 8,
-+	.val_bits		= 8,
-+	.volatile_reg		= ak7755_volatile,
++	.reg_bits = 8,
++	.val_bits = 8,
++
++	.max_register = AK7755_MAX_REGISTERS,
++	.volatile_reg = ak7755_volatile,
++
++	.cache_type = REGCACHE_MAPLE,
++//	.reg_word_size = sizeof(u8),
++	.reg_defaults = ak7755_reg,
++	.num_reg_defaults = ARRAY_SIZE(ak7755_reg),
++//	.readable_register = ak7755_readable,
++//	.volatile_register = ak7755_volatile,
 +};
 +
 +static int ak7755_i2c_probe(struct i2c_client *i2c,
@@ -2829,7 +2832,7 @@ index 000000000..657b1b274
 +	ak7755_data = ak7755;
 +
 +	ret = snd_soc_register_component(&i2c->dev,
-+			&soc_codec_dev_ak7755, &ak7755_dai[0], ARRAY_SIZE(ak7755_dai));
++			&soc_component_dev_ak7755, &ak7755_dai[0], ARRAY_SIZE(ak7755_dai));
 +	if (ret < 0){
 +		kfree(ak7755);
 +		akdbgprt("\t[AK7755 Error!] %s(%d)\n",__FUNCTION__,__LINE__);
@@ -2902,7 +2905,7 @@ index 000000000..657b1b274
 +	}
 +
 +	ret = snd_soc_register_component(&spi->dev,
-+			&soc_codec_dev_ak7755,  &ak7755_dai[0], ARRAY_SIZE(ak7755_dai));
++			&soc_component_dev_ak7755,  &ak7755_dai[0], ARRAY_SIZE(ak7755_dai));
 +	if (ret < 0)
 +		kfree(ak7755);
 +
@@ -2911,10 +2914,9 @@ index 000000000..657b1b274
 +	return 0;
 +}
 +
-+static int ak7755_spi_remove(struct spi_device *spi)
++static void ak7755_spi_remove(struct spi_device *spi)
 +{
 +	kfree(spi_get_drvdata(spi));
-+	return 0;
 +}
 +
 +static struct spi_driver ak7755_spi_driver = {
@@ -2980,6 +2982,7 @@ index 000000000..657b1b274
 +MODULE_AUTHOR("Junichi Wakasugi <wakasugi.jb@om.asahi-kasei.co.jp>");
 +MODULE_DESCRIPTION("ASoC ak7755 codec driver");
 +MODULE_LICENSE("GPL");
++
 diff --git a/sound/soc/codecs/ak7755.h b/sound/soc/codecs/ak7755.h
 new file mode 100755
 index 000000000..3e265ba3a
