@@ -1,19 +1,21 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: John Doe <john.doe@somewhere.on.planet>
-Date: Fri, 9 May 2025 06:46:31 +0000
+Date: Thu, 15 May 2025 07:43:07 +0000
 Subject: Patching kernel rockchip64 files include/sound/ak7755_pdata.h
- sound/soc/codecs/Makefile sound/soc/codecs/ak7755.c sound/soc/codecs/ak7755.h
- sound/soc/codecs/ak7755_dsp_code.h sound/soc/codecs/ak7755ctl.h
+ sound/soc/codecs/Kconfig sound/soc/codecs/Makefile sound/soc/codecs/ak7755.c
+ sound/soc/codecs/ak7755.h sound/soc/codecs/ak7755_dsp_code.h
+ sound/soc/codecs/ak7755ctl.h
 
 Signed-off-by: John Doe <john.doe@somewhere.on.planet>
 ---
  include/sound/ak7755_pdata.h       |   19 +
+ sound/soc/codecs/Kconfig           |    8 +
  sound/soc/codecs/Makefile          |    2 +
- sound/soc/codecs/ak7755.c          | 2906 ++++++++++
+ sound/soc/codecs/ak7755.c          | 2909 ++++++++++
  sound/soc/codecs/ak7755.h          |  177 +
  sound/soc/codecs/ak7755_dsp_code.h |  530 ++
  sound/soc/codecs/ak7755ctl.h       |   75 +
- 6 files changed, 3709 insertions(+)
+ 7 files changed, 3720 insertions(+)
 
 diff --git a/include/sound/ak7755_pdata.h b/include/sound/ak7755_pdata.h
 new file mode 100755
@@ -40,6 +42,40 @@ index 000000000..1350b1dbb
 +
 +#endif
 +
+diff --git a/sound/soc/codecs/Kconfig b/sound/soc/codecs/Kconfig
+index 6a72561c4..16ab7dfcc 100644
+--- a/sound/soc/codecs/Kconfig
++++ b/sound/soc/codecs/Kconfig
+@@ -49,10 +49,11 @@ config SND_SOC_ALL_CODECS
+ 	imply SND_SOC_AK4641
+ 	imply SND_SOC_AK4642
+ 	imply SND_SOC_AK4671
+ 	imply SND_SOC_AK5386
+ 	imply SND_SOC_AK5558
++	imply SND_SOC_AK7755
+ 	imply SND_SOC_ALC5623
+ 	imply SND_SOC_ALC5632
+ 	imply SND_SOC_AUDIO_IIO_AUX
+ 	imply SND_SOC_AW8738
+ 	imply SND_SOC_AW87390
+@@ -624,10 +625,17 @@ config SND_SOC_AK5386
+ 
+ config SND_SOC_AK5558
+ 	tristate "AKM AK5558 CODEC"
+ 	depends on I2C
+ 	select REGMAP_I2C
++	
++config SND_SOC_AK7755
++	tristate "AKM AK7755 CODEC"
++	depends on I2C
++	depends on SPI_MASTER
++	select REGMAP_I2C
++	select REGMAP_SPI
+ 
+ config SND_SOC_ALC5623
+ 	tristate "Realtek ALC5623 CODEC"
+ 	depends on I2C
+ 
 diff --git a/sound/soc/codecs/Makefile b/sound/soc/codecs/Makefile
 index 69cb0b39f..da24728ee 100644
 --- a/sound/soc/codecs/Makefile
@@ -70,10 +106,10 @@ index 69cb0b39f..da24728ee 100644
  obj-$(CONFIG_SND_SOC_AW8738)	+= snd-soc-aw8738.o
 diff --git a/sound/soc/codecs/ak7755.c b/sound/soc/codecs/ak7755.c
 new file mode 100755
-index 000000000..657b1b274
+index 000000000..127d59e59
 --- /dev/null
 +++ b/sound/soc/codecs/ak7755.c
-@@ -0,0 +1,2906 @@
+@@ -0,0 +1,2909 @@
 +/*
 + * ak7755.c  --  audio driver for AK7755
 + *
@@ -93,6 +129,7 @@ index 000000000..657b1b274
 + */
 +
 +#include <linux/module.h>
++#include <linux/kernel.h>
 +#include <linux/init.h>
 +#include <linux/i2c.h>
 +#include <linux/delay.h>
@@ -2982,7 +3019,6 @@ index 000000000..657b1b274
 +MODULE_AUTHOR("Junichi Wakasugi <wakasugi.jb@om.asahi-kasei.co.jp>");
 +MODULE_DESCRIPTION("ASoC ak7755 codec driver");
 +MODULE_LICENSE("GPL");
-+
 diff --git a/sound/soc/codecs/ak7755.h b/sound/soc/codecs/ak7755.h
 new file mode 100755
 index 000000000..3e265ba3a
